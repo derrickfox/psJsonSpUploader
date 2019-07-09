@@ -91,7 +91,8 @@ $json1 = Get-Content -Raw -Path $JsonFilePath | ConvertFrom-Json
 					$User = $theWeb.EnsureUser($testName)
 					$UserFieldValue = new-object Microsoft.SharePoint.SPFieldUserValue($theWeb, $User.ID, $User.LoginName)
 					Write-Output $UserFieldValue
-					$UserCollection.Add($UserFieldValue)
+					# $UserCollection.Add($UserFieldValue)
+					$tempLeadInvestigators += $UserFieldValue
 				}
 			}
 			$newItem["Lead Investigators"] = $tempLeadInvestigators
