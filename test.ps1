@@ -60,7 +60,7 @@ $json1 = Get-Content -Raw -Path $JsonFilePath | ConvertFrom-Json
 		$2018ProjectStatus = $json1[$count]."2018 Project Status"
 		$2019ProjectStatus = $json1[$count]."2019 Project Status"
 		$leadInvestagors = $json1[$count]."Lead Investigators"
-		$supervisorOrRecord = $json1[$count]."Supervisor of Record"
+		$supervisorOfRecord = $json1[$count]."Supervisor of Record"
 		$ncatsTeamMembers = $json1[$count]."NCATS Team Members"
 		$intCollabs = $json1[$count]."Intramural Collaborators (Affiliation)"
 		$extCollabs = $json1[$count]."Extramural Collaborators (Affiliation)"
@@ -79,7 +79,7 @@ $json1 = Get-Content -Raw -Path $JsonFilePath | ConvertFrom-Json
 			$newItem["2018 Project Status"] = $2018ProjectStatus
 			$newItem["2019 Project Status"] = $2019ProjectStatus
 
-			# $newItem["Lead Investigators"] = $leadInvestagors
+			############# Lead Investigator
 			$tempLeadInvestigators
 			foreach ($i in $leadInvestagors) {
 				# # $testName = 'wzheng'
@@ -103,16 +103,38 @@ $json1 = Get-Content -Raw -Path $JsonFilePath | ConvertFrom-Json
 			}
 			$newItem["Lead Investigators"] = $tempLeadInvestigators
 
-			# $newItem["Supervisor of Record"] = $supervisorOrRecord
-			foreach ($i in $supervisorOrRecord) {
-				# Write-Output $i
+			############# Supervisor of Record
+			$tempSupervisofOfRecord
+			foreach ($i in $supervisorOfRecord) {
+				$sam = ""
+				$sam += Get-ADUser -LDAPFilter "(ObjectClass=User)(anr=$($i))" | select samaccountname
+				$loginName = $sam.split("=")[1];
+				$loginName = $loginName.split("}")[0];
+				if($loginName -ne $Null){
+					$User = $theWeb.EnsureUser($loginName)
+					$UserFieldValue = new-object Microsoft.SharePoint.SPFieldUserValue($theWeb, $User.ID, $User.LoginName)
+					$tempSupervisorOfRecord += $UserFieldValue
+				}
 			}
+			$newItem["Supervisor of Record"] = $tempSupervisofOfRecord
 
-			# $newItem["NCATS Team Members"] = $ncatsTeamMembers
+
+			############# NCATS Team Members
+			$tempNcatsTeamMembers
 			foreach ($i in $ncatsTeamMembers) {
-				# Write-Output $i
+				$sam = ""
+				$sam += Get-ADUser -LDAPFilter "(ObjectClass=User)(anr=$($i))" | select samaccountname
+				$loginName = $sam.split("=")[1];
+				$loginName = $loginName.split("}")[0];
+				if($loginName -ne $Null){
+					$User = $theWeb.EnsureUser($loginName)
+					$UserFieldValue = new-object Microsoft.SharePoint.SPFieldUserValue($theWeb, $User.ID, $User.LoginName)
+					$tempNcatsTeamMembers += $UserFieldValue
+				}
 			}
+			$newItem["NCATS Team Members"] = $tempNcatsTeamMembers
 
+			############# Intramural Collabs
 			# $newItem["Intramural Collaborators (Affiliation)"] = $intCollabs
 			foreach ($i in $intCollabs) {
 				# Write-Output $i	
