@@ -1,13 +1,15 @@
 Param([string]$Url)
 
+# Import-Module ActiveDirectory
+Import-Module ('ActiveDirectory')
+
+
 # Check to ensure Microsoft.SharePoint.PowerShell is loaded
 $snapin = Get-PSSnapin | Where-Object {$_.Name -eq 'Microsoft.SharePoint.Powershell'}
 if ($snapin -eq $null) {
-
-Write-Host "Test:"
-"Loading SharePoint Powershell Snapin"
-Add-PSSnapin "Microsoft.SharePoint.Powershell"
-
+	Write-Host "Test:"
+	"Loading SharePoint Powershell Snapin"
+	Add-PSSnapin "Microsoft.SharePoint.Powershell"
 }
 
 $JsonFilePath = 'C:\Users\aafoxdm2\Desktop\powerShellConverter\thing.json'
@@ -31,7 +33,6 @@ $json1 = Get-Content -Raw -Path $JsonFilePath | ConvertFrom-Json
 			return
 		}
 
-
 		$JsonFilePath = 'C:\Users\aafoxdm2\Desktop\powerShellConverter\thing.json'
 		$json1 = Get-Content -Raw -Path $JsonFilePath | ConvertFrom-Json
 		# $getLI = $json1.projects[0].LeadInvestigators
@@ -44,8 +45,11 @@ $json1 = Get-Content -Raw -Path $JsonFilePath | ConvertFrom-Json
 		# $loginName = $sam.split("=")[1];
 		# $loginName = $loginName.split("}")[0];
 		# $reportTitle = $theWeb.ensureuser($loginName)
-		
-		$count = 1
+
+		$rawName = $json1[1]."Supervisor of Record"
+		$testName = Get-ADUser -LDAPFilter "(ObjectClass=User)(anr=$($rawName))" | select samaccountname
+
+		$count = 11
 
 		$reportTitle = $json1[$count]."Report Title"
 		$nihProjectID = $json1[$count]."NIH Project ID"
@@ -72,13 +76,28 @@ $json1 = Get-Content -Raw -Path $JsonFilePath | ConvertFrom-Json
 			$newItem["NCATS Division"] = $ncatsDivision
 			$newItem["2018 Project Status"] = $2018ProjectStatus
 			$newItem["2019 Project Status"] = $2019ProjectStatus
+
 			# $newItem["Lead Investigators"] = $leadInvestagors
+			# foreach ($i in $leadInvestagors) {
+			# 	Write-Output $i
+			# }
 			# $newItem["Supervisor of Record"] = $supervisorOrRecord
+
 			# $newItem["NCATS Team Members"] = $ncatsTeamMembers
-			$newItem["Intramural Collaborators (Affiliation)"] = $intCollabs
-			$newItem["Extramural Collaborators (Affiliation)"] = $extCollabs
+			# foreach ($i in $ncatsTeamMembers) {
+			# 	Write-Output $i
+			# }
+
+			# $newItem["Intramural Collaborators (Affiliation)"] = $intCollabs
+			# foreach ($i in $intCollabs) {
+			# 	if($i -is [String]){
+			# 		Write-Output $i	
+			# 	}
+			# }
+
+			# $newItem["Extramural Collaborators (Affiliation)"] = $extCollabs
 			$newItem["DoesProjectUseHumanBiospecimen"] = $humanCells
-			$newItem["Keywords"] = $keywords
+			# $newItem["Keywords"] = $keywords
 			$newItem["Distinguishing Keyword"] = $distinguishingKeyword
 			$newItem["Goals and Objectives"] = $goalsAndObjectives
 			$newItem["Summary"] = $summary
