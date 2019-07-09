@@ -46,8 +46,10 @@ $json1 = Get-Content -Raw -Path $JsonFilePath | ConvertFrom-Json
 		# $loginName = $loginName.split("}")[0];
 		# $reportTitle = $theWeb.ensureuser($loginName)
 
-		$rawName = $json1[1]."Supervisor of Record"
-		# $testName = Get-ADUser -LDAPFilter "(ObjectClass=User)(anr=$($rawName))" | select samaccountname
+		# $rawName = $json1[12]."Supervisor of Record"
+		# Write-Output $rawName
+		# $testName2 = Get-ADUser -LDAPFilter "(ObjectClass=User)(anr=$($rawName))" | select samaccountname
+		# Write-Output $testName2
 
 		$count = 12
 
@@ -80,18 +82,16 @@ $json1 = Get-Content -Raw -Path $JsonFilePath | ConvertFrom-Json
 			# $newItem["Lead Investigators"] = $leadInvestagors
 			$tempLeadInvestigators
 			foreach ($i in $leadInvestagors) {
-				$testName = 'wzheng'
-				# $testName = Get-ADUser -LDAPFilter "(ObjectClass=User)(anr=$($i))" | select samaccountname
-				# $tempLeadInvestigators += $testName
+				# $testName = 'wzheng'
+				Write-Output $i
+				$testName = Get-ADUser -LDAPFilter "(ObjectClass=User)(anr=$($i))" | select samaccountname
+				Write-Output "testName $testName"
 
 				$targetUser = $theWeb.ensureuser($testName)
 				if($targetUser -ne $Null){
-					# $newitem["Lead Investigators"] = $targetUser
-					# $newitem.update();
 					$User = $theWeb.EnsureUser($testName)
 					$UserFieldValue = new-object Microsoft.SharePoint.SPFieldUserValue($theWeb, $User.ID, $User.LoginName)
 					Write-Output $UserFieldValue
-					# $UserCollection.Add($UserFieldValue)
 					$tempLeadInvestigators += $UserFieldValue
 				}
 			}
