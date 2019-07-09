@@ -78,26 +78,37 @@ $json1 = Get-Content -Raw -Path $JsonFilePath | ConvertFrom-Json
 			$newItem["2019 Project Status"] = $2019ProjectStatus
 
 			# $newItem["Lead Investigators"] = $leadInvestagors
-			# foreach ($i in $leadInvestagors) {
-			# 	Write-Output $i
-			# }
+			foreach ($i in $leadInvestagors) {
+				Write-Output $i
+			}
+
 			# $newItem["Supervisor of Record"] = $supervisorOrRecord
+			foreach ($i in $supervisorOrRecord) {
+				Write-Output $i
+			}
 
 			# $newItem["NCATS Team Members"] = $ncatsTeamMembers
-			# foreach ($i in $ncatsTeamMembers) {
-			# 	Write-Output $i
-			# }
+			foreach ($i in $ncatsTeamMembers) {
+				Write-Output $i
+			}
 
 			# $newItem["Intramural Collaborators (Affiliation)"] = $intCollabs
-			# foreach ($i in $intCollabs) {
-			# 	if($i -is [String]){
-			# 		Write-Output $i	
-			# 	}
-			# }
+			foreach ($i in $intCollabs) {
+				Write-Output $i	
+			}
 
 			# $newItem["Extramural Collaborators (Affiliation)"] = $extCollabs
+			foreach ($i in $extCollabs) {
+				Write-Output $i	
+			}
+
 			$newItem["DoesProjectUseHumanBiospecimen"] = $humanCells
+
 			# $newItem["Keywords"] = $keywords
+			foreach ($i in $keywords) {
+				Write-Output $i	
+			}
+
 			$newItem["Distinguishing Keyword"] = $distinguishingKeyword
 			$newItem["Goals and Objectives"] = $goalsAndObjectives
 			$newItem["Summary"] = $summary
