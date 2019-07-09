@@ -47,9 +47,9 @@ $json1 = Get-Content -Raw -Path $JsonFilePath | ConvertFrom-Json
 		# $reportTitle = $theWeb.ensureuser($loginName)
 
 		$rawName = $json1[1]."Supervisor of Record"
-		$testName = Get-ADUser -LDAPFilter "(ObjectClass=User)(anr=$($rawName))" | select samaccountname
+		# $testName = Get-ADUser -LDAPFilter "(ObjectClass=User)(anr=$($rawName))" | select samaccountname
 
-		$count = 11
+		$count = 12
 
 		$reportTitle = $json1[$count]."Report Title"
 		$nihProjectID = $json1[$count]."NIH Project ID"
@@ -78,37 +78,42 @@ $json1 = Get-Content -Raw -Path $JsonFilePath | ConvertFrom-Json
 			$newItem["2019 Project Status"] = $2019ProjectStatus
 
 			# $newItem["Lead Investigators"] = $leadInvestagors
+			$tempLeadInvestigators
 			foreach ($i in $leadInvestagors) {
-				Write-Output $i
+				$testName = 'wzheng'
+				# $testName = Get-ADUser -LDAPFilter "(ObjectClass=User)(anr=$($i))" | select samaccountname
+				# $tempLeadInvestigators += $testName
+
+				$targetUser = $theWeb.ensureuser($testName)
+				if($targetUser -ne $Null){
+					# $newitem["Lead Investigators"] = $targetUser
+					# $newitem.update();
+					$User = $theWeb.EnsureUser($testName)
+					$UserFieldValue = new-object Microsoft.SharePoint.SPFieldUserValue($theWeb, $User.ID, $User.LoginName)
+					Write-Output $UserFieldValue
+					$UserCollection.Add($UserFieldValue)
+				}
 			}
+			$newItem["Lead Investigators"] = $tempLeadInvestigators
 
 			# $newItem["Supervisor of Record"] = $supervisorOrRecord
 			foreach ($i in $supervisorOrRecord) {
-				Write-Output $i
+				# Write-Output $i
 			}
 
 			# $newItem["NCATS Team Members"] = $ncatsTeamMembers
 			foreach ($i in $ncatsTeamMembers) {
-				Write-Output $i
+				# Write-Output $i
 			}
 
 			# $newItem["Intramural Collaborators (Affiliation)"] = $intCollabs
 			foreach ($i in $intCollabs) {
-				Write-Output $i	
+				# Write-Output $i	
 			}
 
-			# $newItem["Extramural Collaborators (Affiliation)"] = $extCollabs
-			foreach ($i in $extCollabs) {
-				Write-Output $i	
-			}
-
+			$newItem["Extramural Collaborators (Affiliation)"] = $extCollabs
+			$newItem["Keywords"] = $keywords
 			$newItem["DoesProjectUseHumanBiospecimen"] = $humanCells
-
-			# $newItem["Keywords"] = $keywords
-			foreach ($i in $keywords) {
-				Write-Output $i	
-			}
-
 			$newItem["Distinguishing Keyword"] = $distinguishingKeyword
 			$newItem["Goals and Objectives"] = $goalsAndObjectives
 			$newItem["Summary"] = $summary
