@@ -82,14 +82,20 @@ $json1 = Get-Content -Raw -Path $JsonFilePath | ConvertFrom-Json
 			# $newItem["Lead Investigators"] = $leadInvestagors
 			$tempLeadInvestigators
 			foreach ($i in $leadInvestagors) {
-				# $testName = 'wzheng'
-				Write-Output $i
-				$testName = Get-ADUser -LDAPFilter "(ObjectClass=User)(anr=$($i))" | select samaccountname
-				Write-Output "testName $testName"
+				# # $testName = 'wzheng'
+				# Write-Output $i
+				# $testName = Get-ADUser -LDAPFilter "(ObjectClass=User)(anr=$($i))" | select samaccountname
+				# Write-Output "testName $testName"
+				# Write-Output $testName
+				$sam = ""
+				$sam += Get-ADUser -LDAPFilter "(ObjectClass=User)(anr=$($i))" | select samaccountname
+				$loginName = $sam.split("=")[1];
+				$loginName = $loginName.split("}")[0];
+				Write-Output $loginName
+				# $targetUser = $theWeb.ensureuser($loginName)
 
-				$targetUser = $theWeb.ensureuser($testName)
-				if($targetUser -ne $Null){
-					$User = $theWeb.EnsureUser($testName)
+				if($loginName -ne $Null){
+					$User = $theWeb.EnsureUser($loginName)
 					$UserFieldValue = new-object Microsoft.SharePoint.SPFieldUserValue($theWeb, $User.ID, $User.LoginName)
 					Write-Output $UserFieldValue
 					$tempLeadInvestigators += $UserFieldValue
