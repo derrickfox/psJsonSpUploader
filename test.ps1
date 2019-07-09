@@ -103,6 +103,7 @@ $json1 = Get-Content -Raw -Path $JsonFilePath | ConvertFrom-Json
 			}
 			$newItem["Lead Investigators"] = $tempLeadInvestigators
 
+			
 			############# Supervisor of Record
 			$tempSupervisofOfRecord
 			foreach ($i in $supervisorOfRecord) {
@@ -134,12 +135,23 @@ $json1 = Get-Content -Raw -Path $JsonFilePath | ConvertFrom-Json
 			}
 			$newItem["NCATS Team Members"] = $tempNcatsTeamMembers
 
+			
 			############# Intramural Collabs
-			# $newItem["Intramural Collaborators (Affiliation)"] = $intCollabs
+			$tempIntCollabs
 			foreach ($i in $intCollabs) {
-				# Write-Output $i	
+				$sam = ""
+				$sam += Get-ADUser -LDAPFilter "(ObjectClass=User)(anr=$($i))" | select samaccountname
+				$loginName = $sam.split("=")[1];
+				$loginName = $loginName.split("}")[0];
+				if($loginName -ne $Null){
+					$User = $theWeb.EnsureUser($loginName)
+					$UserFieldValue = new-object Microsoft.SharePoint.SPFieldUserValue($theWeb, $User.ID, $User.LoginName)
+					$tempIntCollabs += $UserFieldValue
+				}	
 			}
+			$newItem["Internal Collaborators (affiliation)"] = $tempIntCollabs
 
+			
 			$newItem["Extramural Collaborators (Affiliation)"] = $extCollabs
 			$newItem["Keywords"] = $keywords
 			$newItem["DoesProjectUseHumanBiospecimen"] = $humanCells
@@ -166,7 +178,6 @@ $json1 = Get-Content -Raw -Path $JsonFilePath | ConvertFrom-Json
 	# 	# Update-Projects
 	# 	$count++
 	# }
-
 
     $theSite.Close()
 	$theSite.Dispose()
