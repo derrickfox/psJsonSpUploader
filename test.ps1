@@ -117,13 +117,16 @@ $json1 = Get-Content -Raw -Path $JsonFilePath | ConvertFrom-Json
 					$User = $theWeb.EnsureUser($loginName)
 					$UserFieldValue = new-object Microsoft.SharePoint.SPFieldUserValue($theWeb, $User.ID, $User.LoginName)
 					$tempSupervisorOfRecord += $UserFieldValue
+				}else{
+					Write-Output "Error for 'Supervisor of Record' on ZIA ID: $ziaIdNumber. Cannot find '$i' in Active Directory."
 				}
 			}
 			$newItem["Supervisor of Record"] = $tempSupervisofOfRecord
 
 
 			############# NCATS Team Members
-			$tempNcatsTeamMembers
+			$tempNcatsTeamMembers = new-object Microsoft.SharePoint.SPFieldUserValueCollection
+			$teamCount
 			foreach ($i in $ncatsTeamMembers) {
 				$sam = ""
 				$sam += Get-ADUser -LDAPFilter "(ObjectClass=User)(anr=$($i))" | select samaccountname
@@ -132,26 +135,34 @@ $json1 = Get-Content -Raw -Path $JsonFilePath | ConvertFrom-Json
 				if($loginName -ne $Null){
 					$User = $theWeb.EnsureUser($loginName)
 					$UserFieldValue = new-object Microsoft.SharePoint.SPFieldUserValue($theWeb, $User.ID, $User.LoginName)
-					$tempNcatsTeamMembers += $UserFieldValue
+					# $tempNcatsTeamMembers += $UserFieldValue
+					$tempNcatsTeamMembers.Add($UserFieldValue)
+				}else{
+					Write-Output "Error for 'NCATS Team Memeber' on ZIA ID: $ziaIdNumber. Cannot find '$i' in Active Directory."
 				}
+				$teamCount++
 			}
 			$newItem["NCATS Team Members"] = $tempNcatsTeamMembers
+			Write-Output $tempNcatsTeamMembers
+			Write-Output "Team Count: $teamCount"
 
-			
-			############# Intramural Collabs
-			$tempIntCollabs
-			foreach ($i in $intCollabs) {
-				$sam = ""
-				$sam += Get-ADUser -LDAPFilter "(ObjectClass=User)(anr=$($i))" | select samaccountname
-				$loginName = $sam.split("=")[1];
-				$loginName = $loginName.split("}")[0];
-				if($loginName -ne $Null){
-					$User = $theWeb.EnsureUser($loginName)
-					$UserFieldValue = new-object Microsoft.SharePoint.SPFieldUserValue($theWeb, $User.ID, $User.LoginName)
-					$tempIntCollabs += $UserFieldValue
-				}	
-			}
-			$newItem["Internal Collaborators (affiliation)"] = $tempIntCollabs
+
+			# ############# Intramural Collabs
+			# $tempIntCollabs
+			# foreach ($i in $intCollabs) {
+			# 	$sam = ""
+			# 	$sam += Get-ADUser -LDAPFilter "(ObjectClass=User)(anr=$($i))" | select samaccountname
+			# 	$loginName = $sam.split("=")[1];
+			# 	$loginName = $loginName.split("}")[0];
+			# 	if($loginName -ne $Null){
+			# 		$User = $theWeb.EnsureUser($loginName)
+			# 		$UserFieldValue = new-object Microsoft.SharePoint.SPFieldUserValue($theWeb, $User.ID, $User.LoginName)
+			# 		$tempIntCollabs += $UserFieldValue
+			# 	}else{
+			# 		Write-Output "Error for 'Internal Collaborators' on ZIA ID: $ziaIdNumber. Cannot find '$i' in Active Directory."
+			# 	}	
+			# }
+			# $newItem["Internal Collaborators (affiliation)"] = $tempIntCollabs
 
 			
 			$newItem["Extramural Collaborators (Affiliation)"] = $extCollabs
