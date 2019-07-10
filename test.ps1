@@ -237,6 +237,7 @@ $errorList
 						$tempIntCollabs.Add($UserFieldValue)
 					}else{
 						$numberOfErrorsFound++
+						$errorList += "Intramural Collabs -> '$loginName' does not exist in Active Directory.`n"
 						# Write-Output "ERROR Internal Collaborators"
 						# Write-Output $i
 
