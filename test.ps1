@@ -78,16 +78,19 @@ $errorList
 					$i = "Michael, Sam"
 				}
 				if($i -eq "Lal, Madhu"){
-					$errorList += "'Lal, Madhu' no longer works for NCATS.`n"
+					$errorList += "Lead Investigators -> 'Lal, Madhu' no longer works for NCATS.`n"
 				}
 				if($i -eq "Zhang, Li"){
-					$errorList += "There are 3 'Zhang, Li's in the system. Need a way to select the NCATS one.`n"
+					$errorList += "Lead Investigators -> There are 3 'Zhang, Li's in the system. Need a way to select the NCATS one.`n"
 				}
 				if($i -eq "Zhao, Jinghua"){
-					$errorList += "'Zhao, Jinghua' is not in Active Directory.`n"
+					$errorList += "Lead Investigators -> 'Zhao, Jinghua' is not in Active Directory.`n"
+				}
+				if($i -eq "Ching-Tze, Donald"){
+					$errorList += "Lead Investigators -> 'Ching-Tze, Donald' is not in Active Directory.`n"
 				}
 				if($i -eq "Yang, Na"){
-					$errorList += "'Yang, Na' exists in Active Directory; however, the code is not selecting their username.`n"
+					$errorList += "Lead Investigators -> 'Yang, Na' exists in Active Directory; however, the code is not selecting their username.`n"
 				}
 				$sam = ""
 				$sam += Get-ADUser -LDAPFilter "(ObjectClass=User)(anr=$($i))" | select samaccountname
@@ -105,8 +108,9 @@ $errorList
 					$tempLeadInvestigators.Add($UserFieldValue)
 				}else{
 					$numberOfErrorsFound++
-					Write-Output "ERROR Lead Investigator"
-					Write-Output $i
+					# Write-Output "ERROR Lead Investigator"
+					# Write-Output $i
+
 					# $errorList += "Error for 'Lead Investigator' on ZIA ID: $ziaIdNumber. Cannot find '$i' in Active Directory.`n"
 					# Write-Output "Error for 'Lead Investigator' on ZIA ID: $ziaIdNumber. Cannot find '$i' in Active Directory."
 				}
@@ -137,8 +141,9 @@ $errorList
 						}
 					}else{
 						$numberOfErrorsFound++
-						Write-Output "ERROR Supervisor of Record"
-						Write-Output $i
+						# Write-Output "ERROR Supervisor of Record"
+						# Write-Output $i
+
 						# $errorList += "Error for 'Supervisor of Record' on ZIA ID: $ziaIdNumber. Cannot find '$i' in Active Directory.`n"
 						# Write-Output "Error for 'Supervisor of Record' on ZIA ID: $ziaIdNumber. Cannot find '$i' in Active Directory."
 					}
@@ -150,23 +155,32 @@ $errorList
 			############# NCATS Team Members
 			[Microsoft.SharePoint.SPFieldUserValueCollection]$tempNcatsTeamMembers = new-object Microsoft.SharePoint.SPFieldUserValueCollection
 			foreach ($i in $ncatsTeamMembers) {
-				if($i -eq "Lu, Billy"){
-					$errorList += "'Lu, Billy' is no longer in Active Directory`n"
+				if($i -eq "Lal, Madhu"){
+					$errorList += "NCATS Team Members -> 'Lal, Madhu' no longer works for NCATS.`n"
 				}
-				if($i -eq "Yang, Shu"){
-					$errorList += "'Yang, Shu' is no longer in Active Directory`n"
+				if($i -eq "Lu, Billy"){
+					$errorList += "NCATS Team Members -> 'Lu, Billy' is no longer in Active Directory`n"
+				}
+				if($i -eq "Lee, Tobie"){
+					$errorList += "NCATS Team Members -> 'Lee, Tobie' is no longer in Active Directory`n"
 				}
 				if($i -eq "Guha, Rajarshi"){
-					$errorList += "'Guha, Rajarshi' is no longer in Active Directory`n"
+					$errorList += "NCATS Team Members -> 'Guha, Rajarshi' is no longer in Active Directory`n"
+				}
+				if($i -eq "Boxer, Matthew"){
+					$errorList += "NCATS Team Members -> 'Boxer, Matthew' is no longer in Active Directory`n"
+				}
+				if($i -eq "Yang, Shu"){
+					$errorList += "NCATS Team Members -> 'Yang, Shu' is no longer in Active Directory`n"
 				}
 				if($i -eq "Chen, Lu"){
-					$errorList += "'Chen, Lu' exists in Active Directory; however, the code is not selecting their username.`n"
+					$errorList += "NCATS Team Members -> 'Chen, Lu' exists in Active Directory; however, the code is not selecting their username.`n"
 				}
 				if($i -eq "Li, Rong"){
-					$errorList += "'Li, Rong' exists in Active Directory; however, the code is not selecting their username.`n"
+					$errorList += "NCATS Team Members -> 'Li, Rong' exists in Active Directory; however, the code is not selecting their username.`n"
 				}
 				if($i -eq "Xu, Xin"){
-					$errorList += "There are 3 'Xu, Xin's in the system. Need a way to select the NCATS' one.`n"
+					$errorList += "NCATS Team Members -> There are 3 'Xu, Xin's in the system. Need a way to select the NCATS' one.`n"
 				}
 				$sam = ""
 				$sam += Get-ADUser -LDAPFilter "(ObjectClass=User)(anr=$($i))" | select samaccountname
@@ -182,8 +196,9 @@ $errorList
 					} 
 					catch{						
 						$numberOfErrorsFound++
-						Write-Output "ERROR NCATS Team Members - catch block"
-						Write-Output $i
+						# Write-Output "ERROR NCATS Team Members - catch block"
+						# Write-Output $i
+
 						# $errorList += "Error for 'NCATS Team Memeber' on ZIA ID: $ziaIdNumber. Cannot find '$i' in Active Directory.`n"
 						# Write-Output "Error for 'NCATS Team Memeber' on ZIA ID: $ziaIdNumber. Cannot find '$i' in Active Directory."
 					}
@@ -192,8 +207,9 @@ $errorList
 					$tempNcatsTeamMembers.Add($UserFieldValue)
 				}else{					
 					$numberOfErrorsFound++
-					Write-Output "ERROR NCATS Team Members - else block"
-					Write-Output $i
+					# Write-Output "ERROR NCATS Team Members - else block"
+					# Write-Output $i
+
 					# $errorList += "Error for 'NCATS Team Memeber' on ZIA ID: $ziaIdNumber. Cannot find '$i' in Active Directory.`n"
 					# Write-Output "Error for 'NCATS Team Memeber' on ZIA ID: $ziaIdNumber. Cannot find '$i' in Active Directory."
 				}
@@ -220,9 +236,10 @@ $errorList
 						$UserFieldValue = new-object Microsoft.SharePoint.SPFieldUserValue($theWeb, $User.ID, $User.LoginName)
 						$tempIntCollabs.Add($UserFieldValue)
 					}else{
-						Write-Output "ERROR Internal Collaborators"
 						$numberOfErrorsFound++
-						Write-Output $i
+						# Write-Output "ERROR Internal Collaborators"
+						# Write-Output $i
+
 						# $errorList += "Error for 'Internal Collaborators' on ZIA ID: $ziaIdNumber. Cannot find '$i' in Active Directory."
 						# Write-Output "Error for 'Internal Collaborators' on ZIA ID: $ziaIdNumber. Cannot find '$i' in Active Directory."
 					}	
