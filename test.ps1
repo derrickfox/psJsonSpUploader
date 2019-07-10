@@ -71,6 +71,24 @@ $errorList
 			############# Lead Investigator
 			[Microsoft.SharePoint.SPFieldUserValueCollection]$tempLeadInvestigators = new-object Microsoft.SharePoint.SPFieldUserValueCollection
 			foreach ($i in $leadInvestagors) {
+				if($i -eq "Ferrer-Alegre, Marc"){
+					$i = "Ferrer, Marc"
+				}
+				if($i -eq "Michael, Samuel"){
+					$i = "Michael, Sam"
+				}
+				if($i -eq "Lal, Madhu"){
+					$errorList += "'Lal, Madhu' no longer works for NCATS.`n"
+				}
+				if($i -eq "Zhang, Li"){
+					$errorList += "There are 3 'Zhang, Li's in the system. Need a way to select the NCATS one.`n"
+				}
+				if($i -eq "Zhao, Jinghua"){
+					$errorList += "'Zhao, Jinghua' is not in Active Directory.`n"
+				}
+				if($i -eq "Yang, Na"){
+					$errorList += "'Yang, Na' exists in Active Directory; however, the code is not selecting their username.`n"
+				}
 				$sam = ""
 				$sam += Get-ADUser -LDAPFilter "(ObjectClass=User)(anr=$($i))" | select samaccountname
 				if($sam[1] -ne $Null){
@@ -87,7 +105,7 @@ $errorList
 					$tempLeadInvestigators.Add($UserFieldValue)
 				}else{
 					$numberOfErrorsFound++
-					$errorList += "Error for 'Lead Investigator' on ZIA ID: $ziaIdNumber. Cannot find '$i' in Active Directory.`n"
+					# $errorList += "Error for 'Lead Investigator' on ZIA ID: $ziaIdNumber. Cannot find '$i' in Active Directory.`n"
 					# Write-Output "Error for 'Lead Investigator' on ZIA ID: $ziaIdNumber. Cannot find '$i' in Active Directory."
 				}
 			}
@@ -97,26 +115,29 @@ $errorList
 			############# Supervisor of Record
 			[Microsoft.SharePoint.SPFieldUserValueCollection]$tempSupervisofOfRecord = new-object Microsoft.SharePoint.SPFieldUserValueCollection
 			foreach ($i in $supervisorOfRecord) {
-				# Write-Output $i
-				$sam = ""
-				$sam += Get-ADUser -LDAPFilter "(ObjectClass=User)(anr=$($i))" | select samaccountname
-				if($sam[1] -ne $Null){
-					$loginName = $sam.split("=")[1];
-				}
-				if($loginName -ne $Null){
-					$loginName = $loginName.split("}")[0];	
-				}
-				if($Null -ne $loginName){
-					$User = $theWeb.EnsureUser($loginName)
-					$UserFieldValue = new-object Microsoft.SharePoint.SPFieldUserValue($theWeb, $User.ID, $User.LoginName)
-					if($UserFieldValue){
-						Write-Output $tempSupervisorOfRecord
-						$tempSupervisofOfRecord.Add($UserFieldValue)
-					}
+				if($i -eq "undefined, n/a"){
+					$tempSupervisofOfRecord = $Null
 				}else{
-					$numberOfErrorsFound++
-					$errorList += "Error for 'Supervisor of Record' on ZIA ID: $ziaIdNumber. Cannot find '$i' in Active Directory.`n"
-					# Write-Output "Error for 'Supervisor of Record' on ZIA ID: $ziaIdNumber. Cannot find '$i' in Active Directory."
+					$sam = ""
+					$sam += Get-ADUser -LDAPFilter "(ObjectClass=User)(anr=$($i))" | select samaccountname
+					if($sam[1] -ne $Null){
+						$loginName = $sam.split("=")[1];
+					}
+					if($loginName -ne $Null){
+						$loginName = $loginName.split("}")[0];	
+					}
+					if($Null -ne $loginName){
+						$User = $theWeb.EnsureUser($loginName)
+						$UserFieldValue = new-object Microsoft.SharePoint.SPFieldUserValue($theWeb, $User.ID, $User.LoginName)
+						if($UserFieldValue){
+							# Write-Output $tempSupervisorOfRecord
+							$tempSupervisofOfRecord.Add($UserFieldValue)
+						}
+					}else{
+						$numberOfErrorsFound++
+						# $errorList += "Error for 'Supervisor of Record' on ZIA ID: $ziaIdNumber. Cannot find '$i' in Active Directory.`n"
+						# Write-Output "Error for 'Supervisor of Record' on ZIA ID: $ziaIdNumber. Cannot find '$i' in Active Directory."
+					}
 				}
 			}
 			$newItem["Supervisor of Record"] = $tempSupervisofOfRecord
@@ -125,18 +146,23 @@ $errorList
 			############# NCATS Team Members
 			[Microsoft.SharePoint.SPFieldUserValueCollection]$tempNcatsTeamMembers = new-object Microsoft.SharePoint.SPFieldUserValueCollection
 			foreach ($i in $ncatsTeamMembers) {
-				# Write-Output $i
-				if($i -eq "Li, Rong"){
-					$errorList += "'Li, Rong' is no longer in Active Directory`n"
-					# Write-Output "'Li, Rong' is no longer in Active Directory"
-				}
 				if($i -eq "Lu, Billy"){
 					$errorList += "'Lu, Billy' is no longer in Active Directory`n"
-					# Write-Output "'Lu, Billy' is no longer in Active Directory"
 				}
 				if($i -eq "Yang, Shu"){
 					$errorList += "'Yang, Shu' is no longer in Active Directory`n"
-					# Write-Output "There are 2 'Yang, Shu's in Active Directory. Need a way to select NCATS' one."
+				}
+				if($i -eq "Guha, Rajarshi"){
+					$errorList += "'Guha, Rajarshi' is no longer in Active Directory`n"
+				}
+				if($i -eq "Chen, Lu"){
+					$errorList += "'Chen, Lu' exists in Active Directory; however, the code is not selecting their username.`n"
+				}
+				if($i -eq "Li, Rong"){
+					$errorList += "'Li, Rong' exists in Active Directory; however, the code is not selecting their username.`n"
+				}
+				if($i -eq "Xu, Xin"){
+					$errorList += "There are 3 'Xu, Xin's in the system. Need a way to select the NCATS' one.`n"
 				}
 				$sam = ""
 				$sam += Get-ADUser -LDAPFilter "(ObjectClass=User)(anr=$($i))" | select samaccountname
@@ -152,7 +178,7 @@ $errorList
 					} 
 					catch{
 						$numberOfErrorsFound++
-						$errorList += "Error for 'NCATS Team Memeber' on ZIA ID: $ziaIdNumber. Cannot find '$i' in Active Directory.`n"
+						# $errorList += "Error for 'NCATS Team Memeber' on ZIA ID: $ziaIdNumber. Cannot find '$i' in Active Directory.`n"
 						# Write-Output "Error for 'NCATS Team Memeber' on ZIA ID: $ziaIdNumber. Cannot find '$i' in Active Directory."
 					}
 					
@@ -160,7 +186,7 @@ $errorList
 					$tempNcatsTeamMembers.Add($UserFieldValue)
 				}else{
 					$numberOfErrorsFound++
-					$errorList += "Error for 'NCATS Team Memeber' on ZIA ID: $ziaIdNumber. Cannot find '$i' in Active Directory.`n"
+					# $errorList += "Error for 'NCATS Team Memeber' on ZIA ID: $ziaIdNumber. Cannot find '$i' in Active Directory.`n"
 					# Write-Output "Error for 'NCATS Team Memeber' on ZIA ID: $ziaIdNumber. Cannot find '$i' in Active Directory."
 				}
 			}
@@ -170,23 +196,27 @@ $errorList
 			############# Intramural Collabs
 			[Microsoft.SharePoint.SPFieldUserValueCollection]$tempIntCollabs = new-object Microsoft.SharePoint.SPFieldUserValueCollection
 			foreach ($i in $intCollabs) {
-				$sam = ""
-				$sam += Get-ADUser -LDAPFilter "(ObjectClass=User)(anr=$($i))" | select samaccountname
-				if($sam[1] -ne $Null){
-					$loginName = $sam.split("=")[1];
-				}
-				if($sam[0] -ne $Null){
-					$loginName = $loginName.split("}")[0];	
-				}
-				if($loginName -ne $Null){
-					$User = $theWeb.EnsureUser($loginName)
-					$UserFieldValue = new-object Microsoft.SharePoint.SPFieldUserValue($theWeb, $User.ID, $User.LoginName)
-					$tempIntCollabs.Add($UserFieldValue)
+				if($i -eq "indicated, none"){
+					$tempIntCollabs = $null
 				}else{
-					$numberOfErrorsFound++
-					$errorList += "Error for 'Internal Collaborators' on ZIA ID: $ziaIdNumber. Cannot find '$i' in Active Directory."
-					# Write-Output "Error for 'Internal Collaborators' on ZIA ID: $ziaIdNumber. Cannot find '$i' in Active Directory."
-				}	
+					$sam = ""
+					$sam += Get-ADUser -LDAPFilter "(ObjectClass=User)(anr=$($i))" | select samaccountname
+					if($sam[1] -ne $Null){
+						$loginName = $sam.split("=")[1];
+					}
+					if($loginName -ne $Null){
+						$loginName = $loginName.split("}")[0];	
+					}
+					if($loginName -ne $Null){
+						$User = $theWeb.EnsureUser($loginName)
+						$UserFieldValue = new-object Microsoft.SharePoint.SPFieldUserValue($theWeb, $User.ID, $User.LoginName)
+						$tempIntCollabs.Add($UserFieldValue)
+					}else{
+						$numberOfErrorsFound++
+						$errorList += "Error for 'Internal Collaborators' on ZIA ID: $ziaIdNumber. Cannot find '$i' in Active Directory."
+						# Write-Output "Error for 'Internal Collaborators' on ZIA ID: $ziaIdNumber. Cannot find '$i' in Active Directory."
+					}	
+				}
 			}
 			$newItem["IntramuralCollaborators"] = $tempIntCollabs
 			
