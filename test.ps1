@@ -39,7 +39,7 @@ $numberOfErrorsFound = 0
 		$JsonFilePath = 'C:\Users\aafoxdm2\Desktop\powerShellConverter\thing.json'
 		$json1 = Get-Content -Raw -Path $JsonFilePath | ConvertFrom-Json
 
-		$count = 16
+		# $count = 56
 
 		$reportTitle = $json1[$count]."Report Title"
 		$nihProjectID = $json1[$count]."NIH Project ID"
@@ -193,13 +193,13 @@ $numberOfErrorsFound = 0
 
 	$theSite = New-Object Microsoft.SharePoint.SPSite($Url)
 
-	Update-Projects
+	# Update-Projects
 
-	# $count = 0
-	# foreach ($num in $json1) {
-	# 	# Update-Projects
-	# 	$count++
-	# }
+	$count = 0
+	foreach ($num in $json1) {
+		Update-Projects
+		$count++
+	}
 
     $theSite.Close()
 	$theSite.Dispose()
