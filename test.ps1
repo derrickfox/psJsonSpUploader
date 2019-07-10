@@ -259,9 +259,9 @@ $errorList
 		$theWeb.Close()
 		$theWeb.Dispose()
 		if($numberOfErrorsFound -gt 0){
-			Write-Output "******** Start of $ziaIdNumber **************** `n"
+			Write-Output "******** Start of $ziaIdNumber ****************"
 			Write-Output "Number of errors found: $numberOfErrorsFound"
-			Write-Output "$errorList" "********* End of $ziaIdNumber ****************************** `n"
+			Write-Output "$errorList `n"
 		}
 		
 	}
