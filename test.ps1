@@ -15,6 +15,7 @@ if ($snapin -eq $null) {
 $JsonFilePath = 'C:\Users\aafoxdm2\Desktop\powerShellConverter\thing.json'
 $json1 = Get-Content -Raw -Path $JsonFilePath | ConvertFrom-Json
 $numberOfErrorsFound = 0
+$errorList
 
 	Function UpdateField
 	{
@@ -75,7 +76,7 @@ $numberOfErrorsFound = 0
 				if($sam[1] -ne $Null){
 					$loginName = $sam.split("=")[1];
 				}
-				if($sam[0] -ne $Null){
+				if($loginName -ne $Null){
 					$loginName = $loginName.split("}")[0];	
 				}
 
@@ -86,7 +87,8 @@ $numberOfErrorsFound = 0
 					$tempLeadInvestigators.Add($UserFieldValue)
 				}else{
 					$numberOfErrorsFound++
-					Write-Output "Error for 'Lead Investigator' on ZIA ID: $ziaIdNumber. Cannot find '$i' in Active Directory."
+					$errorList += "Error for 'Lead Investigator' on ZIA ID: $ziaIdNumber. Cannot find '$i' in Active Directory.`n"
+					# Write-Output "Error for 'Lead Investigator' on ZIA ID: $ziaIdNumber. Cannot find '$i' in Active Directory."
 				}
 			}
 			$newItem["Lead Investigators"] = $tempLeadInvestigators
@@ -113,7 +115,8 @@ $numberOfErrorsFound = 0
 					}
 				}else{
 					$numberOfErrorsFound++
-					Write-Output "Error for 'Supervisor of Record' on ZIA ID: $ziaIdNumber. Cannot find '$i' in Active Directory."
+					$errorList += "Error for 'Supervisor of Record' on ZIA ID: $ziaIdNumber. Cannot find '$i' in Active Directory.`n"
+					# Write-Output "Error for 'Supervisor of Record' on ZIA ID: $ziaIdNumber. Cannot find '$i' in Active Directory."
 				}
 			}
 			$newItem["Supervisor of Record"] = $tempSupervisofOfRecord
@@ -123,6 +126,18 @@ $numberOfErrorsFound = 0
 			[Microsoft.SharePoint.SPFieldUserValueCollection]$tempNcatsTeamMembers = new-object Microsoft.SharePoint.SPFieldUserValueCollection
 			foreach ($i in $ncatsTeamMembers) {
 				# Write-Output $i
+				if($i -eq "Li, Rong"){
+					$errorList += "'Li, Rong' is no longer in Active Directory`n"
+					# Write-Output "'Li, Rong' is no longer in Active Directory"
+				}
+				if($i -eq "Lu, Billy"){
+					$errorList += "'Lu, Billy' is no longer in Active Directory`n"
+					# Write-Output "'Lu, Billy' is no longer in Active Directory"
+				}
+				if($i -eq "Yang, Shu"){
+					$errorList += "'Yang, Shu' is no longer in Active Directory`n"
+					# Write-Output "There are 2 'Yang, Shu's in Active Directory. Need a way to select NCATS' one."
+				}
 				$sam = ""
 				$sam += Get-ADUser -LDAPFilter "(ObjectClass=User)(anr=$($i))" | select samaccountname
 				if($sam[1] -ne $Null){
@@ -137,14 +152,16 @@ $numberOfErrorsFound = 0
 					} 
 					catch{
 						$numberOfErrorsFound++
-						Write-Output "Error for 'NCATS Team Memeber' on ZIA ID: $ziaIdNumber. Cannot find '$i' in Active Directory."
+						$errorList += "Error for 'NCATS Team Memeber' on ZIA ID: $ziaIdNumber. Cannot find '$i' in Active Directory.`n"
+						# Write-Output "Error for 'NCATS Team Memeber' on ZIA ID: $ziaIdNumber. Cannot find '$i' in Active Directory."
 					}
 					
 					$UserFieldValue = new-object Microsoft.SharePoint.SPFieldUserValue($theWeb, $User.ID, $User.LoginName)
 					$tempNcatsTeamMembers.Add($UserFieldValue)
 				}else{
 					$numberOfErrorsFound++
-					Write-Output "Error for 'NCATS Team Memeber' on ZIA ID: $ziaIdNumber. Cannot find '$i' in Active Directory."
+					$errorList += "Error for 'NCATS Team Memeber' on ZIA ID: $ziaIdNumber. Cannot find '$i' in Active Directory.`n"
+					# Write-Output "Error for 'NCATS Team Memeber' on ZIA ID: $ziaIdNumber. Cannot find '$i' in Active Directory."
 				}
 			}
 			$newItem["NCATS Team Members"] = $tempNcatsTeamMembers
@@ -167,7 +184,8 @@ $numberOfErrorsFound = 0
 					$tempIntCollabs.Add($UserFieldValue)
 				}else{
 					$numberOfErrorsFound++
-					Write-Output "Error for 'Internal Collaborators' on ZIA ID: $ziaIdNumber. Cannot find '$i' in Active Directory."
+					$errorList += "Error for 'Internal Collaborators' on ZIA ID: $ziaIdNumber. Cannot find '$i' in Active Directory."
+					# Write-Output "Error for 'Internal Collaborators' on ZIA ID: $ziaIdNumber. Cannot find '$i' in Active Directory."
 				}	
 			}
 			$newItem["IntramuralCollaborators"] = $tempIntCollabs
@@ -183,7 +201,12 @@ $numberOfErrorsFound = 0
 		}
 		$theWeb.Close()
 		$theWeb.Dispose()
-		Write-Output "Number of errors found: $numberOfErrorsFound"
+		if($numberOfErrorsFound -gt 0){
+			Write-Output "******** Start of $ziaIdNumber **************** `n"
+			Write-Output "Number of errors found: $numberOfErrorsFound"
+			Write-Output "$errorList" "********* End of $ziaIdNumber ****************************** `n"
+		}
+		
 	}
 
 	Function Update-Projects
