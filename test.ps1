@@ -35,21 +35,6 @@ $json1 = Get-Content -Raw -Path $JsonFilePath | ConvertFrom-Json
 
 		$JsonFilePath = 'C:\Users\aafoxdm2\Desktop\powerShellConverter\thing.json'
 		$json1 = Get-Content -Raw -Path $JsonFilePath | ConvertFrom-Json
-		# $getLI = $json1.projects[0].LeadInvestigators
-		# $getLI = $getLI.split("(")
-		# $getLI = $getLI.split(" ")
-		# $clientName = $getLI[2] + ', ' + $getLI[0]
-
-		# $sam = ""
-		# $sam += Get-ADUser -LDAPFilter "(ObjectClass=User)(anr=$($clientName))" | select samaccountname
-		# $loginName = $sam.split("=")[1];
-		# $loginName = $loginName.split("}")[0];
-		# $reportTitle = $theWeb.ensureuser($loginName)
-
-		# $rawName = $json1[12]."Supervisor of Record"
-		# Write-Output $rawName
-		# $testName2 = Get-ADUser -LDAPFilter "(ObjectClass=User)(anr=$($rawName))" | select samaccountname
-		# Write-Output $testName2
 
 		$count = 27
 
@@ -80,13 +65,8 @@ $json1 = Get-Content -Raw -Path $JsonFilePath | ConvertFrom-Json
 			$newItem["2019 Project Status"] = $2019ProjectStatus
 
 			############# Lead Investigator
-			$tempLeadInvestigators
+			[Microsoft.SharePoint.SPFieldUserValueCollection]$tempLeadInvestigators = new-object Microsoft.SharePoint.SPFieldUserValueCollection
 			foreach ($i in $leadInvestagors) {
-				# # $testName = 'wzheng'
-				# Write-Output $i
-				# $testName = Get-ADUser -LDAPFilter "(ObjectClass=User)(anr=$($i))" | select samaccountname
-				# Write-Output "testName $testName"
-				# Write-Output $testName
 				$sam = ""
 				$sam += Get-ADUser -LDAPFilter "(ObjectClass=User)(anr=$($i))" | select samaccountname
 				if($sam[1]){
@@ -95,15 +75,12 @@ $json1 = Get-Content -Raw -Path $JsonFilePath | ConvertFrom-Json
 				if($sam[0]){
 					$loginName = $loginName.split("}")[0];	
 				}
-				
-				# Write-Output $loginName
-				# $targetUser = $theWeb.ensureuser($loginName)
 
 				if($loginName){
 					$User = $theWeb.EnsureUser($loginName)
 					$UserFieldValue = new-object Microsoft.SharePoint.SPFieldUserValue($theWeb, $User.ID, $User.LoginName)
-					# Write-Output $UserFieldValue
-					$tempLeadInvestigators += $UserFieldValue
+					# $tempLeadInvestigators += $UserFieldValue
+					$tempLeadInvestigators.Add($UserFieldValue)
 				}else{
 					Write-Output "Error for 'Lead Investigator' on ZIA ID: $ziaIdNumber. Cannot find '$i' in Active Directory."
 				}
@@ -112,7 +89,7 @@ $json1 = Get-Content -Raw -Path $JsonFilePath | ConvertFrom-Json
 
 			
 			############# Supervisor of Record
-			$tempSupervisofOfRecord
+			[Microsoft.SharePoint.SPFieldUserValueCollection]$tempSupervisofOfRecord = new-object Microsoft.SharePoint.SPFieldUserValueCollection
 			foreach ($i in $supervisorOfRecord) {
 				$sam = ""
 				$sam += Get-ADUser -LDAPFilter "(ObjectClass=User)(anr=$($i))" | select samaccountname
@@ -134,10 +111,9 @@ $json1 = Get-Content -Raw -Path $JsonFilePath | ConvertFrom-Json
 
 
 			############# NCATS Team Members
-			$tempNcatsTeamMembers = new-object Microsoft.SharePoint.SPFieldUserValueCollection
-			$teamCount
+			[Microsoft.SharePoint.SPFieldUserValueCollection]$tempNcatsTeamMembers = new-object Microsoft.SharePoint.SPFieldUserValueCollection
 			foreach ($i in $ncatsTeamMembers) {
-				Write-Output $i
+				# Write-Output $i
 				$sam = ""
 				$sam += Get-ADUser -LDAPFilter "(ObjectClass=User)(anr=$($i))" | select samaccountname
 				if($sam[1]){
@@ -149,36 +125,34 @@ $json1 = Get-Content -Raw -Path $JsonFilePath | ConvertFrom-Json
 				if($loginName -ne $Null){
 					$User = $theWeb.EnsureUser($loginName)
 					$UserFieldValue = new-object Microsoft.SharePoint.SPFieldUserValue($theWeb, $User.ID, $User.LoginName)
-					# $tempNcatsTeamMembers += $UserFieldValue
 					$tempNcatsTeamMembers.Add($UserFieldValue)
 				}else{
 					Write-Output "Error for 'NCATS Team Memeber' on ZIA ID: $ziaIdNumber. Cannot find '$i' in Active Directory."
 				}
-				$teamCount++
 			}
 			$newItem["NCATS Team Members"] = $tempNcatsTeamMembers
-			# $newItem["Project_x0020_Members"] = $tempNcatsTeamMembers
-			Write-Output $tempNcatsTeamMembers
-			Write-Output "Team Count: $teamCount"
 
 
-			# ############# Intramural Collabs
-			# $tempIntCollabs
-			# foreach ($i in $intCollabs) {
-			# 	$sam = ""
-			# 	$sam += Get-ADUser -LDAPFilter "(ObjectClass=User)(anr=$($i))" | select samaccountname
-			# 	$loginName = $sam.split("=")[1];
-			# 	$loginName = $loginName.split("}")[0];
-			# 	if($loginName -ne $Null){
-			# 		$User = $theWeb.EnsureUser($loginName)
-			# 		$UserFieldValue = new-object Microsoft.SharePoint.SPFieldUserValue($theWeb, $User.ID, $User.LoginName)
-			# 		$tempIntCollabs += $UserFieldValue
-			# 	}else{
-			# 		Write-Output "Error for 'Internal Collaborators' on ZIA ID: $ziaIdNumber. Cannot find '$i' in Active Directory."
-			# 	}	
-			# }
-			# $newItem["Internal Collaborators (affiliation)"] = $tempIntCollabs
-
+			############# Intramural Collabs
+			[Microsoft.SharePoint.SPFieldUserValueCollection]$tempIntCollabs = new-object Microsoft.SharePoint.SPFieldUserValueCollection
+			foreach ($i in $intCollabs) {
+				$sam = ""
+				$sam += Get-ADUser -LDAPFilter "(ObjectClass=User)(anr=$($i))" | select samaccountname
+				if($sam[1]){
+					$loginName = $sam.split("=")[1];
+				}
+				if($sam[0]){
+					$loginName = $loginName.split("}")[0];	
+				}
+				if($loginName -ne $Null){
+					$User = $theWeb.EnsureUser($loginName)
+					$UserFieldValue = new-object Microsoft.SharePoint.SPFieldUserValue($theWeb, $User.ID, $User.LoginName)
+					$tempIntCollabs.Add($UserFieldValue)
+				}else{
+					Write-Output "Error for 'Internal Collaborators' on ZIA ID: $ziaIdNumber. Cannot find '$i' in Active Directory."
+				}	
+			}
+			$newItem["IntramuralCollaborators"] = $tempIntCollabs
 			
 			$newItem["Extramural Collaborators (Affiliation)"] = $extCollabs
 			$newItem["Keywords"] = $keywords
