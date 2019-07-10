@@ -105,6 +105,8 @@ $errorList
 					$tempLeadInvestigators.Add($UserFieldValue)
 				}else{
 					$numberOfErrorsFound++
+					Write-Output "ERROR Lead Investigator"
+					Write-Output $i
 					# $errorList += "Error for 'Lead Investigator' on ZIA ID: $ziaIdNumber. Cannot find '$i' in Active Directory.`n"
 					# Write-Output "Error for 'Lead Investigator' on ZIA ID: $ziaIdNumber. Cannot find '$i' in Active Directory."
 				}
@@ -135,6 +137,8 @@ $errorList
 						}
 					}else{
 						$numberOfErrorsFound++
+						Write-Output "ERROR Supervisor of Record"
+						Write-Output $i
 						# $errorList += "Error for 'Supervisor of Record' on ZIA ID: $ziaIdNumber. Cannot find '$i' in Active Directory.`n"
 						# Write-Output "Error for 'Supervisor of Record' on ZIA ID: $ziaIdNumber. Cannot find '$i' in Active Directory."
 					}
@@ -176,16 +180,20 @@ $errorList
 					try{
 						$User = $theWeb.EnsureUser($loginName)
 					} 
-					catch{
+					catch{						
 						$numberOfErrorsFound++
+						Write-Output "ERROR NCATS Team Members - catch block"
+						Write-Output $i
 						# $errorList += "Error for 'NCATS Team Memeber' on ZIA ID: $ziaIdNumber. Cannot find '$i' in Active Directory.`n"
 						# Write-Output "Error for 'NCATS Team Memeber' on ZIA ID: $ziaIdNumber. Cannot find '$i' in Active Directory."
 					}
 					
 					$UserFieldValue = new-object Microsoft.SharePoint.SPFieldUserValue($theWeb, $User.ID, $User.LoginName)
 					$tempNcatsTeamMembers.Add($UserFieldValue)
-				}else{
+				}else{					
 					$numberOfErrorsFound++
+					Write-Output "ERROR NCATS Team Members - else block"
+					Write-Output $i
 					# $errorList += "Error for 'NCATS Team Memeber' on ZIA ID: $ziaIdNumber. Cannot find '$i' in Active Directory.`n"
 					# Write-Output "Error for 'NCATS Team Memeber' on ZIA ID: $ziaIdNumber. Cannot find '$i' in Active Directory."
 				}
@@ -212,8 +220,10 @@ $errorList
 						$UserFieldValue = new-object Microsoft.SharePoint.SPFieldUserValue($theWeb, $User.ID, $User.LoginName)
 						$tempIntCollabs.Add($UserFieldValue)
 					}else{
+						Write-Output "ERROR Internal Collaborators"
 						$numberOfErrorsFound++
-						$errorList += "Error for 'Internal Collaborators' on ZIA ID: $ziaIdNumber. Cannot find '$i' in Active Directory."
+						Write-Output $i
+						# $errorList += "Error for 'Internal Collaborators' on ZIA ID: $ziaIdNumber. Cannot find '$i' in Active Directory."
 						# Write-Output "Error for 'Internal Collaborators' on ZIA ID: $ziaIdNumber. Cannot find '$i' in Active Directory."
 					}	
 				}
@@ -241,7 +251,7 @@ $errorList
 
 	Function Update-Projects
 	{
-		UpdateField "" "Projects2"
+		UpdateField "" "ProjectsEmpty"
 	}
 
 	$theSite = New-Object Microsoft.SharePoint.SPSite($Url)
