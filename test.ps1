@@ -89,8 +89,13 @@ $json1 = Get-Content -Raw -Path $JsonFilePath | ConvertFrom-Json
 				# Write-Output $testName
 				$sam = ""
 				$sam += Get-ADUser -LDAPFilter "(ObjectClass=User)(anr=$($i))" | select samaccountname
-				$loginName = $sam.split("=")[1];
-				$loginName = $loginName.split("}")[0];
+				if($sam[1]){
+					$loginName = $sam.split("=")[1];
+				}
+				if($sam[0]){
+					$loginName = $loginName.split("}")[0];	
+				}
+				
 				# Write-Output $loginName
 				# $targetUser = $theWeb.ensureuser($loginName)
 
@@ -111,8 +116,12 @@ $json1 = Get-Content -Raw -Path $JsonFilePath | ConvertFrom-Json
 			foreach ($i in $supervisorOfRecord) {
 				$sam = ""
 				$sam += Get-ADUser -LDAPFilter "(ObjectClass=User)(anr=$($i))" | select samaccountname
-				$loginName = $sam.split("=")[1];
-				$loginName = $loginName.split("}")[0];
+				if($sam[1]){
+					$loginName = $sam.split("=")[1];
+				}
+				if($sam[0]){
+					$loginName = $loginName.split("}")[0];	
+				}
 				if($loginName -ne $Null){
 					$User = $theWeb.EnsureUser($loginName)
 					$UserFieldValue = new-object Microsoft.SharePoint.SPFieldUserValue($theWeb, $User.ID, $User.LoginName)
@@ -128,10 +137,15 @@ $json1 = Get-Content -Raw -Path $JsonFilePath | ConvertFrom-Json
 			$tempNcatsTeamMembers = new-object Microsoft.SharePoint.SPFieldUserValueCollection
 			$teamCount
 			foreach ($i in $ncatsTeamMembers) {
+				Write-Output $i
 				$sam = ""
 				$sam += Get-ADUser -LDAPFilter "(ObjectClass=User)(anr=$($i))" | select samaccountname
-				$loginName = $sam.split("=")[1];
-				$loginName = $loginName.split("}")[0];
+				if($sam[1]){
+					$loginName = $sam.split("=")[1];
+				}
+				if($sam[0]){
+					$loginName = $loginName.split("}")[0];	
+				}
 				if($loginName -ne $Null){
 					$User = $theWeb.EnsureUser($loginName)
 					$UserFieldValue = new-object Microsoft.SharePoint.SPFieldUserValue($theWeb, $User.ID, $User.LoginName)
@@ -143,6 +157,7 @@ $json1 = Get-Content -Raw -Path $JsonFilePath | ConvertFrom-Json
 				$teamCount++
 			}
 			$newItem["NCATS Team Members"] = $tempNcatsTeamMembers
+			# $newItem["Project_x0020_Members"] = $tempNcatsTeamMembers
 			Write-Output $tempNcatsTeamMembers
 			Write-Output "Team Count: $teamCount"
 
@@ -171,6 +186,7 @@ $json1 = Get-Content -Raw -Path $JsonFilePath | ConvertFrom-Json
 			$newItem["Distinguishing Keyword"] = $distinguishingKeyword
 			$newItem["Goals and Objectives"] = $goalsAndObjectives
 			$newItem["Summary"] = $summary
+			$newItem["Title"] = "Test Title"
 			$newitem.Update();
 		}
 		$theWeb.Close()
