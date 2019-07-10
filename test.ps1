@@ -51,7 +51,7 @@ $json1 = Get-Content -Raw -Path $JsonFilePath | ConvertFrom-Json
 		# $testName2 = Get-ADUser -LDAPFilter "(ObjectClass=User)(anr=$($rawName))" | select samaccountname
 		# Write-Output $testName2
 
-		$count = 12
+		$count = 27
 
 		$reportTitle = $json1[$count]."Report Title"
 		$nihProjectID = $json1[$count]."NIH Project ID"
@@ -91,14 +91,16 @@ $json1 = Get-Content -Raw -Path $JsonFilePath | ConvertFrom-Json
 				$sam += Get-ADUser -LDAPFilter "(ObjectClass=User)(anr=$($i))" | select samaccountname
 				$loginName = $sam.split("=")[1];
 				$loginName = $loginName.split("}")[0];
-				Write-Output $loginName
+				# Write-Output $loginName
 				# $targetUser = $theWeb.ensureuser($loginName)
 
-				if($loginName -ne $Null){
+				if($loginName){
 					$User = $theWeb.EnsureUser($loginName)
 					$UserFieldValue = new-object Microsoft.SharePoint.SPFieldUserValue($theWeb, $User.ID, $User.LoginName)
-					Write-Output $UserFieldValue
+					# Write-Output $UserFieldValue
 					$tempLeadInvestigators += $UserFieldValue
+				}else{
+					Write-Output "Error for 'Lead Investigator' on ZIA ID: $ziaIdNumber. Cannot find '$i' in Active Directory."
 				}
 			}
 			$newItem["Lead Investigators"] = $tempLeadInvestigators
