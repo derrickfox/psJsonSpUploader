@@ -14,6 +14,7 @@ if ($snapin -eq $null) {
 
 $JsonFilePath = 'C:\Users\aafoxdm2\Desktop\powerShellConverter\thing.json'
 $json1 = Get-Content -Raw -Path $JsonFilePath | ConvertFrom-Json
+$numberOfErrorsFound = 0
 
 	Function UpdateField
 	{
@@ -22,6 +23,7 @@ $json1 = Get-Content -Raw -Path $JsonFilePath | ConvertFrom-Json
 		$theWeb = $theSite.OpenWeb("/" + $webName)
 		if ($theWeb -eq $null)
 		{
+			$numberOfErrorsFound++
 			Write-Host "Could not open Web : " + $webName -ForegroundColor Red
 			return
 		}
@@ -29,6 +31,7 @@ $json1 = Get-Content -Raw -Path $JsonFilePath | ConvertFrom-Json
 		[Microsoft.SharePoint.SPList]$theList = $theWeb.Lists.TryGetList($listName)
 		if ($theList -eq $null)
 		{
+			$numberOfErrorsFound++
 			Write-Host "Could not open List : " + $listName -ForegroundColor Red
 			return
 		}
@@ -36,7 +39,7 @@ $json1 = Get-Content -Raw -Path $JsonFilePath | ConvertFrom-Json
 		$JsonFilePath = 'C:\Users\aafoxdm2\Desktop\powerShellConverter\thing.json'
 		$json1 = Get-Content -Raw -Path $JsonFilePath | ConvertFrom-Json
 
-		$count = 27
+		$count = 16
 
 		$reportTitle = $json1[$count]."Report Title"
 		$nihProjectID = $json1[$count]."NIH Project ID"
@@ -69,10 +72,10 @@ $json1 = Get-Content -Raw -Path $JsonFilePath | ConvertFrom-Json
 			foreach ($i in $leadInvestagors) {
 				$sam = ""
 				$sam += Get-ADUser -LDAPFilter "(ObjectClass=User)(anr=$($i))" | select samaccountname
-				if($sam[1]){
+				if($sam[1] -ne $Null){
 					$loginName = $sam.split("=")[1];
 				}
-				if($sam[0]){
+				if($sam[0] -ne $Null){
 					$loginName = $loginName.split("}")[0];	
 				}
 
@@ -82,6 +85,7 @@ $json1 = Get-Content -Raw -Path $JsonFilePath | ConvertFrom-Json
 					# $tempLeadInvestigators += $UserFieldValue
 					$tempLeadInvestigators.Add($UserFieldValue)
 				}else{
+					$numberOfErrorsFound++
 					Write-Output "Error for 'Lead Investigator' on ZIA ID: $ziaIdNumber. Cannot find '$i' in Active Directory."
 				}
 			}
@@ -91,19 +95,24 @@ $json1 = Get-Content -Raw -Path $JsonFilePath | ConvertFrom-Json
 			############# Supervisor of Record
 			[Microsoft.SharePoint.SPFieldUserValueCollection]$tempSupervisofOfRecord = new-object Microsoft.SharePoint.SPFieldUserValueCollection
 			foreach ($i in $supervisorOfRecord) {
+				# Write-Output $i
 				$sam = ""
 				$sam += Get-ADUser -LDAPFilter "(ObjectClass=User)(anr=$($i))" | select samaccountname
-				if($sam[1]){
+				if($sam[1] -ne $Null){
 					$loginName = $sam.split("=")[1];
 				}
-				if($sam[0]){
+				if($loginName -ne $Null){
 					$loginName = $loginName.split("}")[0];	
 				}
-				if($loginName -ne $Null){
+				if($Null -ne $loginName){
 					$User = $theWeb.EnsureUser($loginName)
 					$UserFieldValue = new-object Microsoft.SharePoint.SPFieldUserValue($theWeb, $User.ID, $User.LoginName)
-					$tempSupervisorOfRecord += $UserFieldValue
+					if($UserFieldValue){
+						Write-Output $tempSupervisorOfRecord
+						$tempSupervisofOfRecord.Add($UserFieldValue)
+					}
 				}else{
+					$numberOfErrorsFound++
 					Write-Output "Error for 'Supervisor of Record' on ZIA ID: $ziaIdNumber. Cannot find '$i' in Active Directory."
 				}
 			}
@@ -116,17 +125,25 @@ $json1 = Get-Content -Raw -Path $JsonFilePath | ConvertFrom-Json
 				# Write-Output $i
 				$sam = ""
 				$sam += Get-ADUser -LDAPFilter "(ObjectClass=User)(anr=$($i))" | select samaccountname
-				if($sam[1]){
+				if($sam[1] -ne $Null){
 					$loginName = $sam.split("=")[1];
 				}
-				if($sam[0]){
+				if($Null -ne $loginName){
 					$loginName = $loginName.split("}")[0];	
 				}
 				if($loginName -ne $Null){
-					$User = $theWeb.EnsureUser($loginName)
+					try{
+						$User = $theWeb.EnsureUser($loginName)
+					} 
+					catch{
+						$numberOfErrorsFound++
+						Write-Output "Error for 'NCATS Team Memeber' on ZIA ID: $ziaIdNumber. Cannot find '$i' in Active Directory."
+					}
+					
 					$UserFieldValue = new-object Microsoft.SharePoint.SPFieldUserValue($theWeb, $User.ID, $User.LoginName)
 					$tempNcatsTeamMembers.Add($UserFieldValue)
 				}else{
+					$numberOfErrorsFound++
 					Write-Output "Error for 'NCATS Team Memeber' on ZIA ID: $ziaIdNumber. Cannot find '$i' in Active Directory."
 				}
 			}
@@ -138,10 +155,10 @@ $json1 = Get-Content -Raw -Path $JsonFilePath | ConvertFrom-Json
 			foreach ($i in $intCollabs) {
 				$sam = ""
 				$sam += Get-ADUser -LDAPFilter "(ObjectClass=User)(anr=$($i))" | select samaccountname
-				if($sam[1]){
+				if($sam[1] -ne $Null){
 					$loginName = $sam.split("=")[1];
 				}
-				if($sam[0]){
+				if($sam[0] -ne $Null){
 					$loginName = $loginName.split("}")[0];	
 				}
 				if($loginName -ne $Null){
@@ -149,6 +166,7 @@ $json1 = Get-Content -Raw -Path $JsonFilePath | ConvertFrom-Json
 					$UserFieldValue = new-object Microsoft.SharePoint.SPFieldUserValue($theWeb, $User.ID, $User.LoginName)
 					$tempIntCollabs.Add($UserFieldValue)
 				}else{
+					$numberOfErrorsFound++
 					Write-Output "Error for 'Internal Collaborators' on ZIA ID: $ziaIdNumber. Cannot find '$i' in Active Directory."
 				}	
 			}
@@ -165,6 +183,7 @@ $json1 = Get-Content -Raw -Path $JsonFilePath | ConvertFrom-Json
 		}
 		$theWeb.Close()
 		$theWeb.Dispose()
+		Write-Output "Number of errors found: $numberOfErrorsFound"
 	}
 
 	Function Update-Projects
